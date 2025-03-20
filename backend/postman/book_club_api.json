@@ -33,7 +33,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+              "raw": "{\n    \"name\": \"{{test_user_name}}\",\n    \"email\": \"{{test_user_email}}\",\n    \"password\": \"{{test_user_password}}\"\n}"
             },
             "description": "Register a new user"
           }
@@ -55,7 +55,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+              "raw": "{\n    \"email\": \"{{test_user_email}}\",\n    \"password\": \"{{test_user_password}}\"\n}"
             },
             "description": "Login with user credentials"
           }
@@ -107,7 +107,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Updated Name\"\n}"
+              "raw": "{\n    \"name\": \"Updated {{test_user_name}}\"\n}"
             },
             "description": "Update the current user's profile"
           }
@@ -134,7 +134,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"newemail@example.com\",\n    \"currentPassword\": \"password123\"\n}"
+              "raw": "{\n    \"email\": \"new{{test_user_email}}\",\n    \"currentPassword\": \"{{test_user_password}}\"\n}"
             },
             "description": "Update user's email address"
           }
@@ -161,7 +161,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"currentPassword\": \"password123\",\n    \"newPassword\": \"newpassword123\"\n}"
+              "raw": "{\n    \"currentPassword\": \"{{test_user_password}}\",\n    \"newPassword\": \"new{{test_user_password}}\"\n}"
             },
             "description": "Change user's password"
           }
