@@ -21,7 +21,7 @@ router.get('/profile', authenticate, async (req, res, next) => {
           id: user.id,
           name: user.name,
           email: user.email,
-          createdAt: user.createdAt,
+          createdAt: user.created_at,
         },
       },
     });
@@ -51,7 +51,7 @@ router.patch('/profile', authenticate, async (req, res, next) => {
           id: user.id,
           name: user.name,
           email: user.email,
-          createdAt: user.createdAt,
+          createdAt: user.created_at,
         },
       },
     });
@@ -87,7 +87,7 @@ router.patch('/email', authenticate, async (req, res, next) => {
           id: user.id,
           name: user.name,
           email: user.email,
-          createdAt: user.createdAt,
+          createdAt: user.created_at,
         },
       },
     });

@@ -3,7 +3,7 @@ import { BookClub, CreateBookClubRequest, UpdateBookClubRequest, BookClubWithMem
 import { AppError } from '../utils/errors';
 
 export class BookClubService {
-  static async createBookClub(userId: string, data: CreateBookClubRequest): Promise<BookClub> {
+  static async createBookClub(userId: number, data: CreateBookClubRequest): Promise<BookClub> {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
@@ -35,7 +35,7 @@ export class BookClubService {
     }
   }
 
-  static async getBookClub(id: string, userId: string): Promise<BookClubWithMembers> {
+  static async getBookClub(id: number, userId: number): Promise<BookClubWithMembers> {
     try {
       // First check if user is a member
       const memberCheck = await pool.query(
@@ -84,23 +84,11 @@ export class BookClubService {
       if (error instanceof AppError) {
         throw error;
       }
-      if (error.code === '22P02') {
-        throw new AppError('Invalid book club ID format', 400);
-      }
-      if (error.code === '42P01') {
-        throw new AppError('Database table not found', 500);
-      }
       throw new AppError('Failed to get book club', 500);
     }
   }
 
-  static async updateBookClub(id: string, userId: string, data: UpdateBookClubRequest): Promise<BookClub> {
-    // Validate UUID format first
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
-      throw new AppError('Invalid book club ID format', 400);
-    }
-
+  static async updateBookClub(id: number, userId: number, data: UpdateBookClubRequest): Promise<BookClub> {
     // First check if user is a member
     const memberCheck = await pool.query(
       `SELECT 1 FROM book_club_members 
@@ -140,13 +128,7 @@ export class BookClubService {
     return result.rows[0];
   }
 
-  static async deleteBookClub(id: string, userId: string): Promise<void> {
-    // Validate UUID format first
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
-      throw new AppError('Invalid book club ID format', 400);
-    }
-
+  static async deleteBookClub(id: number, userId: number): Promise<void> {
     // First check if user is a member
     const memberCheck = await pool.query(
       `SELECT 1 FROM book_club_members 
@@ -179,13 +161,7 @@ export class BookClubService {
     }
   }
 
-  static async joinBookClub(id: string, userId: string): Promise<void> {
-    // Validate UUID format first
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
-      throw new AppError('Invalid book club ID format', 400);
-    }
-
+  static async joinBookClub(id: number, userId: number): Promise<void> {
     // Check if already a member
     const existingMember = await pool.query(
       `SELECT 1 FROM book_club_members 
@@ -205,13 +181,7 @@ export class BookClubService {
     );
   }
 
-  static async leaveBookClub(id: string, userId: string): Promise<void> {
-    // Validate UUID format first
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
-      throw new AppError('Invalid book club ID format', 400);
-    }
-
+  static async leaveBookClub(id: number, userId: number): Promise<void> {
     // Check if user is a member
     const memberResult = await pool.query(
       `SELECT role FROM book_club_members 
@@ -242,12 +212,13 @@ export class BookClubService {
     );
   }
 
-  static async listUserBookClubs(userId: string): Promise<BookClub[]> {
+  static async listUserBookClubs(userId: number): Promise<BookClub[]> {
     try {
       const result = await pool.query(
         `SELECT bc.*, 
                 COUNT(DISTINCT bcm.user_id) as member_count,
-                bcm.role as user_role
+                bcm.role as user_role,
+                EXISTS(SELECT 1 FROM book_club_members WHERE user_id = $1 AND book_club_id = bc.id) as is_member
          FROM book_clubs bc
          JOIN book_club_members bcm ON bc.id = bcm.book_club_id
          WHERE bcm.user_id = $1
@@ -257,103 +228,83 @@ export class BookClubService {
       );
 
       return result.rows;
-    } catch (error: any) {
-      if (error instanceof AppError) {
-        throw error;
-      }
+    } catch (error) {
       throw new AppError('Failed to list book clubs', 500);
     }
   }
 
-  static async listBookClubMembers(id: string, userId: string): Promise<any[]> {
-    try {
-      // First check if user is a member
-      const memberCheck = await pool.query(
-        `SELECT 1 FROM book_club_members 
-         WHERE book_club_id = $1 AND user_id = $2`,
-        [id, userId]
-      );
+  static async listBookClubMembers(id: number, userId: number): Promise<any[]> {
+    // First check if user is a member
+    const memberCheck = await pool.query(
+      `SELECT 1 FROM book_club_members 
+       WHERE book_club_id = $1 AND user_id = $2`,
+      [id, userId]
+    );
 
-      if (memberCheck.rows.length === 0) {
-        throw new AppError('Not authorized to access this book club', 403);
-      }
-
-      const result = await pool.query(
-        `SELECT bcm.user_id, bcm.role, bcm.joined_at,
-                u.name, u.email
-         FROM book_club_members bcm
-         JOIN users u ON bcm.user_id = u.id
-         WHERE bcm.book_club_id = $1
-         ORDER BY bcm.joined_at ASC`,
-        [id]
-      );
-
-      return result.rows;
-    } catch (error: any) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError('Failed to list book club members', 500);
+    if (memberCheck.rows.length === 0) {
+      throw new AppError('Not authorized to access this book club', 403);
     }
+
+    const result = await pool.query(
+      `SELECT bcm.user_id, bcm.role, bcm.joined_at,
+              u.name, u.email
+       FROM book_club_members bcm
+       JOIN users u ON bcm.user_id = u.id
+       WHERE bcm.book_club_id = $1
+       ORDER BY bcm.joined_at ASC`,
+      [id]
+    );
+
+    return result.rows;
   }
 
   static async updateMemberRole(
-    bookClubId: string,
-    targetUserId: string,
-    userId: string,
+    bookClubId: number,
+    targetUserId: number,
+    userId: number,
     newRole: 'admin' | 'member'
   ): Promise<void> {
-    try {
-      // First check if user is a member and is admin
-      const memberCheck = await pool.query(
-        `SELECT role FROM book_club_members 
-         WHERE book_club_id = $1 AND user_id = $2`,
-        [bookClubId, userId]
-      );
+    // Check if the requesting user is an admin
+    const adminCheck = await pool.query(
+      `SELECT 1 FROM book_club_members 
+       WHERE book_club_id = $1 AND user_id = $2 AND role = 'admin'`,
+      [bookClubId, userId]
+    );
 
-      if (memberCheck.rows.length === 0) {
-        throw new AppError('Not authorized to access this book club', 403);
-      }
-
-      if (memberCheck.rows[0].role !== 'admin') {
-        throw new AppError('Unauthorized to update member roles', 403);
-      }
-
-      // Check if target user is a member
-      const targetMemberCheck = await pool.query(
-        `SELECT role FROM book_club_members 
-         WHERE book_club_id = $1 AND user_id = $2`,
-        [bookClubId, targetUserId]
-      );
-
-      if (targetMemberCheck.rows.length === 0) {
-        throw new AppError('Target user is not a member of this book club', 404);
-      }
-
-      // Prevent removing the last admin
-      if (newRole === 'member' && targetMemberCheck.rows[0].role === 'admin') {
-        const adminCount = await pool.query(
-          `SELECT COUNT(*) FROM book_club_members 
-           WHERE book_club_id = $1 AND role = 'admin'`,
-          [bookClubId]
-        );
-
-        if (parseInt(adminCount.rows[0].count) <= 1) {
-          throw new AppError('Cannot remove the last admin', 400);
-        }
-      }
-
-      await pool.query(
-        `UPDATE book_club_members 
-         SET role = $1
-         WHERE book_club_id = $2 AND user_id = $3`,
-        [newRole, bookClubId, targetUserId]
-      );
-    } catch (error: any) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError('Failed to update member role', 500);
+    if (adminCheck.rows.length === 0) {
+      throw new AppError('Not authorized to update member roles', 403);
     }
+
+    // Check if target user is a member
+    const memberCheck = await pool.query(
+      `SELECT role FROM book_club_members 
+       WHERE book_club_id = $1 AND user_id = $2`,
+      [bookClubId, targetUserId]
+    );
+
+    if (memberCheck.rows.length === 0) {
+      throw new AppError('Target user is not a member of this book club', 404);
+    }
+
+    // If demoting from admin, check if they're not the last admin
+    if (memberCheck.rows[0].role === 'admin' && newRole === 'member') {
+      const adminCount = await pool.query(
+        `SELECT COUNT(*) FROM book_club_members 
+         WHERE book_club_id = $1 AND role = 'admin'`,
+        [bookClubId]
+      );
+
+      if (parseInt(adminCount.rows[0].count) <= 1) {
+        throw new AppError('Cannot demote the last admin', 400);
+      }
+    }
+
+    // Update the role
+    await pool.query(
+      `UPDATE book_club_members 
+       SET role = $1
+       WHERE book_club_id = $2 AND user_id = $3`,
+      [newRole, bookClubId, targetUserId]
+    );
   }
 }

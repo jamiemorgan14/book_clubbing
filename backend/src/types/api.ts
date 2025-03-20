@@ -44,7 +44,7 @@ export interface RegisterRequest {
 export interface AuthResponse {
   token: string;
   user: {
-    id: string;
+    id: number;
     email: string;
     name: string;
   };
@@ -52,7 +52,7 @@ export interface AuthResponse {
 
 // User Types
 export interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
   password_hash?: string;
@@ -62,18 +62,18 @@ export interface User {
 
 // Group Types
 export interface Group {
-  id: string;
+  id: number;
   name: string;
   description?: string;
-  createdBy: string;
+  createdBy: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface GroupMember {
-  id: string;
-  groupId: string;
-  userId: string;
+  id: number;
+  groupId: number;
+  userId: number;
   role: 'admin' | 'member';
   status: 'pending' | 'active';
   createdAt: string;
@@ -82,7 +82,7 @@ export interface GroupMember {
 
 // Book Types
 export interface Book {
-  id: string;
+  id: number;
   goodreadsId?: string;
   title: string;
   author: string;
@@ -94,34 +94,34 @@ export interface Book {
 
 // Discussion Types
 export interface Discussion {
-  id: string;
-  groupId: string;
-  bookId: string;
+  id: number;
+  groupId: number;
+  bookId: number;
   title: string;
   content: string;
-  createdBy: string;
+  createdBy: number;
   createdAt: string;
   updatedAt: string;
 }
 
 // Meetup Types
 export interface Meetup {
-  id: string;
-  groupId: string;
-  bookId: string;
+  id: number;
+  groupId: number;
+  bookId: number;
   scheduledFor: string;
   location?: string;
   status: 'scheduled' | 'completed' | 'cancelled';
-  createdBy: string;
+  createdBy: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface BookClub {
-  id: string;
+  id: number;
   name: string;
   description: string;
-  created_by: string;
+  created_by: number;
   created_at: Date;
   updated_at: Date;
   member_count?: number;
@@ -139,15 +139,15 @@ export interface UpdateBookClubRequest {
 }
 
 export interface BookClubMember {
-  user_id: string;
-  book_club_id: string;
+  user_id: number;
+  book_club_id: number;
   role: 'admin' | 'member';
   joined_at: Date;
 }
 
 export interface BookClubWithMembers extends BookClub {
   members: {
-    user_id: string;
+    user_id: number;
     name: string;
     email: string;
     role: 'admin' | 'member';

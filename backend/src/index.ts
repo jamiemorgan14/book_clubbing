@@ -22,7 +22,7 @@ app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Basic health check route
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json(ApiResponseBuilder.success({ status: 'ok' }));
 });
 
@@ -32,7 +32,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/book-clubs', bookClubRoutes);
 
 // 404 handler
-app.use((req, res) => {
+app.use((_req, res) => {
   res.status(404).json(
     ApiResponseBuilder.error({
       code: 'NOT_FOUND',

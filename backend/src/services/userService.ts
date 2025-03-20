@@ -20,7 +20,7 @@ export class UserService {
     const result = await pool.query(
       `INSERT INTO users (name, email, password_hash)
        VALUES ($1, $2, $3)
-       RETURNING id, name, email, created_at as "createdAt"`,
+       RETURNING id, name, email, created_at, updated_at`,
       [name, email, passwordHash]
     );
 
@@ -29,7 +29,7 @@ export class UserService {
 
   static async findByEmail(email: string): Promise<User | null> {
     const result = await pool.query(
-      `SELECT id, name, email, password_hash, created_at as "createdAt"
+      `SELECT id, name, email, password_hash, created_at, updated_at
        FROM users
        WHERE email = $1`,
       [email]
@@ -38,9 +38,9 @@ export class UserService {
     return result.rows[0] || null;
   }
 
-  static async findById(id: string): Promise<User | null> {
+  static async findById(id: number): Promise<User | null> {
     const result = await pool.query(
-      `SELECT id, name, email, created_at as "createdAt"
+      `SELECT id, name, email, created_at, updated_at
        FROM users
        WHERE id = $1`,
       [id]
@@ -62,22 +62,22 @@ export class UserService {
 
     // Return user without password hash
     const { password_hash, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return userWithoutPassword as User;
   }
 
-  static async updateProfile(userId: string, data: { name: string }): Promise<User | null> {
+  static async updateProfile(userId: number, data: { name: string }): Promise<User | null> {
     const result = await pool.query(
       `UPDATE users
        SET name = $1, updated_at = CURRENT_TIMESTAMP
        WHERE id = $2
-       RETURNING id, name, email, created_at as "createdAt"`,
+       RETURNING id, name, email, created_at, updated_at`,
       [data.name, userId]
     );
 
     return result.rows[0] || null;
   }
 
-  static async updateEmail(userId: string, email: string): Promise<User | null> {
+  static async updateEmail(userId: number, email: string): Promise<User | null> {
     // Check if email is already taken
     const existingUser = await this.findByEmail(email);
     if (existingUser) {
@@ -88,14 +88,14 @@ export class UserService {
       `UPDATE users
        SET email = $1, updated_at = CURRENT_TIMESTAMP
        WHERE id = $2
-       RETURNING id, name, email, created_at as "createdAt"`,
+       RETURNING id, name, email, created_at, updated_at`,
       [email, userId]
     );
 
     return result.rows[0] || null;
   }
 
-  static async updatePassword(userId: string, newPassword: string): Promise<void> {
+  static async updatePassword(userId: number, newPassword: string): Promise<void> {
     const passwordHash = await AuthUtils.hashPassword(newPassword);
     
     await pool.query(
@@ -106,7 +106,7 @@ export class UserService {
     );
   }
 
-  static async getUserBookClubs(userId: string) {
+  static async getUserBookClubs(userId: number) {
     const result = await pool.query(
       `SELECT bc.*, 
               COUNT(DISTINCT bcm.user_id) as member_count,

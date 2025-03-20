@@ -1,13 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
-import { ApiResponseBuilder } from '../utils/apiResponse';
+import { Request, Response } from 'express';
 import { AppError } from '../utils/errors';
 
 export const errorHandler = (
   err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+  _req: Request,
+  res: Response) => {
   console.error('Error:', err);
 
   if (err instanceof AppError) {

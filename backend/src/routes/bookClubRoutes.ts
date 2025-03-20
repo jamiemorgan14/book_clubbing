@@ -11,7 +11,7 @@ const router = express.Router();
 // List user's book clubs
 router.get('/', authenticate, async (req, res, next) => {
   try {
-    const bookClubs = await BookClubService.listUserBookClubs(req.user!.id.toString());
+    const bookClubs = await BookClubService.listUserBookClubs(req.user!.id);
     res.json(bookClubs);
   } catch (error) {
     next(error);
@@ -21,7 +21,7 @@ router.get('/', authenticate, async (req, res, next) => {
 // List book club members
 router.get('/:id/members', authenticate, async (req, res, next) => {
   try {
-    const members = await BookClubService.listBookClubMembers(req.params.id, req.user!.id.toString());
+    const members = await BookClubService.listBookClubMembers(req.params.id, req.user!.id);
     res.json(members);
   } catch (error) {
     next(error);
@@ -42,7 +42,7 @@ router.patch(
       await BookClubService.updateMemberRole(
         req.params.id,
         req.params.userId,
-        req.user!.id.toString(),
+        req.user!.id,
         req.body.role
       );
       res.status(204).send();

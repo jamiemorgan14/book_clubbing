@@ -32,7 +32,7 @@ const updateBookClubSchema = z.object({
 });
 
 // UUID validation middleware
-const validateUUID = (req: any, res: any, next: any) => {
+const validateUUID = (req: any, _res: any, next: any) => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(req.params.id)) {
     throw new AppError('Invalid book club ID format', 400);

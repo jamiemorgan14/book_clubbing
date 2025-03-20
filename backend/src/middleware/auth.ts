@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthUtils } from '../utils/auth';
 import { AppError } from '../utils/errors';
-import { ApiErrorBuilder } from '../utils/apiResponse';
 
 declare global {
   namespace Express {
@@ -17,7 +16,7 @@ declare global {
 
 export const authenticate = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {

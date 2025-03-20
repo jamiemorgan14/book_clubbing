@@ -29,7 +29,7 @@ const pool = new Pool({
 });
 
 // Test the connection
-pool.connect((err, client, release) => {
+pool.connect((err, _client, release) => {
   if (err) {
     console.error('Error connecting to PostgreSQL database:', err.stack);
     process.exit(1); // Exit if we can't connect to the database
