@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
 import { ApiResponseBuilder } from './utils/apiResponse';
 import authRoutes from './routes/auth';
+import userRoutes from './routes/users';
 
 // Load environment variables
 dotenv.config();
@@ -25,6 +26,7 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
 
 // 404 handler
 app.use((req, res) => {

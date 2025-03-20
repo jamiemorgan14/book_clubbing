@@ -14,6 +14,7 @@
   "item": [
     {
       "name": "Authentication",
+      "description": "User authentication endpoints",
       "item": [
         {
           "name": "Register User",
@@ -60,6 +61,151 @@
           }
         }
       ]
+    },
+    {
+      "name": "User Management",
+      "description": "User profile and settings management",
+      "item": [
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            },
+            "description": "Get the current user's profile"
+          }
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Name\"\n}"
+            },
+            "description": "Update the current user's profile"
+          }
+        },
+        {
+          "name": "Update Email",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/email",
+              "host": ["{{base_url}}"],
+              "path": ["users", "email"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"newemail@example.com\",\n    \"currentPassword\": \"password123\"\n}"
+            },
+            "description": "Update user's email address"
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/password",
+              "host": ["{{base_url}}"],
+              "path": ["users", "password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"password123\",\n    \"newPassword\": \"newpassword123\"\n}"
+            },
+            "description": "Change user's password"
+          }
+        },
+        {
+          "name": "Get User's Book Clubs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/book-clubs",
+              "host": ["{{base_url}}"],
+              "path": ["users", "book-clubs"]
+            },
+            "description": "Get all book clubs the user is a member of"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Book Clubs",
+      "description": "Book club management endpoints",
+      "item": []
+    },
+    {
+      "name": "Books",
+      "description": "Book management endpoints",
+      "item": []
+    },
+    {
+      "name": "Discussions",
+      "description": "Book discussion endpoints",
+      "item": []
+    },
+    {
+      "name": "Meetups",
+      "description": "Book club meetup endpoints",
+      "item": []
     }
   ]
 } 
