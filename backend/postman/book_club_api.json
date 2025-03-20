@@ -57,7 +57,31 @@
               "mode": "raw",
               "raw": "{\n    \"email\": \"{{test_user_email}}\",\n    \"password\": \"{{test_user_password}}\"\n}"
             },
-            "description": "Login with user credentials"
+            "description": "Login with user credentials",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "// Parse the response body",
+                    "const response = pm.response.json();",
+                    "",
+                    "// Check if the response was successful",
+                    "if (response.success && response.data.token) {",
+                    "    // Save the token to the environment",
+                    "    pm.environment.set('token', response.data.token);",
+                    "    ",
+                    "    // Log success message",
+                    "    console.log('Token saved successfully');",
+                    "} else {",
+                    "    // Log error if token wasn't found",
+                    "    console.error('Failed to save token:', response);",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
           }
         }
       ]
