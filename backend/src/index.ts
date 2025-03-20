@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
 import { ApiResponseBuilder } from './utils/apiResponse';
+import authRoutes from './routes/auth';
 
 // Load environment variables
 dotenv.config();
@@ -22,13 +23,8 @@ app.get('/health', (req, res) => {
   res.json(ApiResponseBuilder.success({ status: 'ok' }));
 });
 
-// API routes will be added here
-app.use('/api/v1/auth', require('./routes/auth'));
-app.use('/api/v1/users', require('./routes/users'));
-app.use('/api/v1/groups', require('./routes/groups'));
-app.use('/api/v1/books', require('./routes/books'));
-app.use('/api/v1/discussions', require('./routes/discussions'));
-app.use('/api/v1/meetups', require('./routes/meetups'));
+// API routes
+app.use('/api/v1/auth', authRoutes);
 
 // 404 handler
 app.use((req, res) => {
