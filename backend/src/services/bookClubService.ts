@@ -241,4 +241,119 @@ export class BookClubService {
       [id, userId]
     );
   }
+
+  static async listUserBookClubs(userId: string): Promise<BookClub[]> {
+    try {
+      const result = await pool.query(
+        `SELECT bc.*, 
+                COUNT(DISTINCT bcm.user_id) as member_count,
+                bcm.role as user_role
+         FROM book_clubs bc
+         JOIN book_club_members bcm ON bc.id = bcm.book_club_id
+         WHERE bcm.user_id = $1
+         GROUP BY bc.id, bcm.role
+         ORDER BY bc.created_at DESC`,
+        [userId]
+      );
+
+      return result.rows;
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to list book clubs', 500);
+    }
+  }
+
+  static async listBookClubMembers(id: string, userId: string): Promise<any[]> {
+    try {
+      // First check if user is a member
+      const memberCheck = await pool.query(
+        `SELECT 1 FROM book_club_members 
+         WHERE book_club_id = $1 AND user_id = $2`,
+        [id, userId]
+      );
+
+      if (memberCheck.rows.length === 0) {
+        throw new AppError('Not authorized to access this book club', 403);
+      }
+
+      const result = await pool.query(
+        `SELECT bcm.user_id, bcm.role, bcm.joined_at,
+                u.name, u.email
+         FROM book_club_members bcm
+         JOIN users u ON bcm.user_id = u.id
+         WHERE bcm.book_club_id = $1
+         ORDER BY bcm.joined_at ASC`,
+        [id]
+      );
+
+      return result.rows;
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to list book club members', 500);
+    }
+  }
+
+  static async updateMemberRole(
+    bookClubId: string,
+    targetUserId: string,
+    userId: string,
+    newRole: 'admin' | 'member'
+  ): Promise<void> {
+    try {
+      // First check if user is a member and is admin
+      const memberCheck = await pool.query(
+        `SELECT role FROM book_club_members 
+         WHERE book_club_id = $1 AND user_id = $2`,
+        [bookClubId, userId]
+      );
+
+      if (memberCheck.rows.length === 0) {
+        throw new AppError('Not authorized to access this book club', 403);
+      }
+
+      if (memberCheck.rows[0].role !== 'admin') {
+        throw new AppError('Unauthorized to update member roles', 403);
+      }
+
+      // Check if target user is a member
+      const targetMemberCheck = await pool.query(
+        `SELECT role FROM book_club_members 
+         WHERE book_club_id = $1 AND user_id = $2`,
+        [bookClubId, targetUserId]
+      );
+
+      if (targetMemberCheck.rows.length === 0) {
+        throw new AppError('Target user is not a member of this book club', 404);
+      }
+
+      // Prevent removing the last admin
+      if (newRole === 'member' && targetMemberCheck.rows[0].role === 'admin') {
+        const adminCount = await pool.query(
+          `SELECT COUNT(*) FROM book_club_members 
+           WHERE book_club_id = $1 AND role = 'admin'`,
+          [bookClubId]
+        );
+
+        if (parseInt(adminCount.rows[0].count) <= 1) {
+          throw new AppError('Cannot remove the last admin', 400);
+        }
+      }
+
+      await pool.query(
+        `UPDATE book_club_members 
+         SET role = $1
+         WHERE book_club_id = $2 AND user_id = $3`,
+        [newRole, bookClubId, targetUserId]
+      );
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to update member role', 500);
+    }
+  }
 }

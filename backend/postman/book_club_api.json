@@ -25,11 +25,13 @@
 							"raw": "{\n    \"name\": \"{{test_user_name}}\",\n    \"email\": \"{{test_user_email}}\",\n    \"password\": \"{{test_user_password}}\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/auth/register",
+							"raw": "{{base_url}}/api/v1/auth/register",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
+								"api",
+								"v1",
 								"auth",
 								"register"
 							]
@@ -45,13 +47,13 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Set token variable in environment\", function () {",
-									"    pm.environment.set(\"token\", pm.response.json().data.token);",
-									"});",
-									""
+									"pm.test(\"Set token variables in environment\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"token\", jsonData.data.accessToken);",
+									"    pm.environment.set(\"refresh_token\", jsonData.data.refreshToken);",
+									"});"
 								],
-								"type": "text/javascript",
-								"packages": {}
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -68,11 +70,13 @@
 							"raw": "{\n    \"email\": \"{{test_user_email}}\",\n    \"password\": \"{{test_user_password}}\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/auth/login",
+							"raw": "{{base_url}}/api/v1/auth/login",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
+								"api",
+								"v1",
 								"auth",
 								"login"
 							]
@@ -80,6 +84,70 @@
 						"description": "Login with user credentials"
 					},
 					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Update token variables in environment\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"token\", jsonData.data.accessToken);",
+									"    pm.environment.set(\"refresh_token\", jsonData.data.refreshToken);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/refresh-token",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "refresh-token"]
+						},
+						"description": "Refresh the access token using refresh token"
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "logout"]
+						},
+						"description": "Logout user and invalidate refresh token"
+					}
 				}
 			],
 			"description": "User authentication endpoints"
@@ -243,6 +311,25 @@
 			"name": "Book Clubs",
 			"item": [
 				{
+					"name": "List User's Book Clubs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/book-clubs",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book-clubs"]
+						},
+						"description": "Get all book clubs the authenticated user is a member of"
+					}
+				},
+				{
 					"name": "Create Book Club",
 					"request": {
 						"method": "POST",
@@ -254,21 +341,18 @@
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
-						"url": {
-							"raw": "{{base_url}}/book-clubs",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"book-clubs"
-							]
-						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"My Book Club\",\n    \"description\": \"A great book club for testing\"\n}"
+							"raw": "{\n    \"name\": \"My Book Club\",\n    \"description\": \"A club for book lovers\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/book-clubs",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book-clubs"]
 						},
 						"description": "Create a new book club"
 					}
@@ -285,16 +369,11 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/book-clubs/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"book-clubs",
-								"1"
-							]
+							"raw": "{{base_url}}/api/v1/book-clubs/{{book_club_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book-clubs", "{{book_club_id}}"]
 						},
-						"description": "Get a book club by ID"
+						"description": "Get details of a specific book club"
 					}
 				},
 				{
@@ -309,24 +388,20 @@
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
-						"url": {
-							"raw": "{{base_url}}/book-clubs/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"book-clubs",
-								"1"
-							]
-						},
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Updated Book Club Name\",\n    \"description\": \"Updated description\"\n}"
 						},
-						"description": "Update a book club"
+						"url": {
+							"raw": "{{base_url}}/api/v1/book-clubs/{{book_club_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book-clubs", "{{book_club_id}}"]
+						},
+						"description": "Update a book club's details (admin only)"
 					}
 				},
 				{
@@ -341,16 +416,11 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/book-clubs/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"book-clubs",
-								"1"
-							]
+							"raw": "{{base_url}}/api/v1/book-clubs/{{book_club_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book-clubs", "{{book_club_id}}"]
 						},
-						"description": "Delete a book club"
+						"description": "Delete a book club (admin only)"
 					}
 				},
 				{
@@ -365,15 +435,9 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/book-clubs/1/join",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"book-clubs",
-								"1",
-								"join"
-							]
+							"raw": "{{base_url}}/api/v1/book-clubs/{{book_club_id}}/join",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book-clubs", "{{book_club_id}}", "join"]
 						},
 						"description": "Join a book club"
 					}
@@ -390,17 +454,58 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/book-clubs/1/leave",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"book-clubs",
-								"1",
-								"leave"
-							]
+							"raw": "{{base_url}}/api/v1/book-clubs/{{book_club_id}}/leave",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book-clubs", "{{book_club_id}}", "leave"]
 						},
 						"description": "Leave a book club"
+					}
+				},
+				{
+					"name": "List Book Club Members",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/book-clubs/{{book_club_id}}/members",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book-clubs", "{{book_club_id}}", "members"]
+						},
+						"description": "Get all members of a book club"
+					}
+				},
+				{
+					"name": "Update Member Role",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/book-clubs/{{book_club_id}}/members/{{member_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book-clubs", "{{book_club_id}}", "members", "{{member_id}}"]
+						},
+						"description": "Update a member's role (admin only)"
 					}
 				}
 			],
@@ -425,8 +530,36 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:3001/api/v1",
+			"value": "http://localhost:3001",
 			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "your_jwt_token_here"
+		},
+		{
+			"key": "refresh_token",
+			"value": "your_refresh_token_here"
+		},
+		{
+			"key": "test_user_name",
+			"value": "Test User"
+		},
+		{
+			"key": "test_user_email",
+			"value": "test@example.com"
+		},
+		{
+			"key": "test_user_password",
+			"value": "password123"
+		},
+		{
+			"key": "book_club_id",
+			"value": "your_book_club_id_here"
+		},
+		{
+			"key": "member_id",
+			"value": "your_member_id_here"
 		}
 	]
 }
