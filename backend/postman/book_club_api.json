@@ -1,240 +1,270 @@
 {
-  "info": {
-    "name": "Book Club API",
-    "description": "API collection for Book Club application",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:3001/api/v1",
-      "type": "string"
-    }
-  ],
-  "item": [
-    {
-      "name": "Authentication",
-      "description": "User authentication endpoints",
-      "item": [
-        {
-          "name": "Register User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "register"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name\": \"{{test_user_name}}\",\n    \"email\": \"{{test_user_email}}\",\n    \"password\": \"{{test_user_password}}\"\n}"
-            },
-            "description": "Register a new user"
-          }
-        },
-        {
-          "name": "Login User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"email\": \"{{test_user_email}}\",\n    \"password\": \"{{test_user_password}}\"\n}"
-            },
-            "description": "Login with user credentials",
-            "event": [
-              {
-                "listen": "test",
-                "script": {
-                  "exec": [
-                    "// Log the response for debugging",
-                    "console.log('Response status:', pm.response.code);",
-                    "console.log('Response body:', pm.response.text());",
-                    "",
-                    "// Parse the response body",
-                    "const response = pm.response.json();",
-                    "",
-                    "// Check if the response was successful",
-                    "if (response.success && response.data && response.data.token) {",
-                    "    // Save the token to the environment",
-                    "    pm.environment.set('token', response.data.token);",
-                    "    ",
-                    "    // Log success message with token preview",
-                    "    console.log('Token saved successfully:', response.data.token.substring(0, 20) + '...');",
-                    "} else {",
-                    "    // Log detailed error information",
-                    "    console.error('Failed to save token. Response:', response);",
-                    "    console.error('Response structure:', JSON.stringify(response, null, 2));",
-                    "}"
-                  ],
-                  "type": "text/javascript"
-                }
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "User Management",
-      "description": "User profile and settings management",
-      "item": [
-        {
-          "name": "Get User Profile",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/users/profile",
-              "host": ["{{base_url}}"],
-              "path": ["users", "profile"]
-            },
-            "description": "Get the current user's profile"
-          }
-        },
-        {
-          "name": "Update User Profile",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/users/profile",
-              "host": ["{{base_url}}"],
-              "path": ["users", "profile"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name\": \"Updated {{test_user_name}}\"\n}"
-            },
-            "description": "Update the current user's profile"
-          }
-        },
-        {
-          "name": "Update Email",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/users/email",
-              "host": ["{{base_url}}"],
-              "path": ["users", "email"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"email\": \"new{{test_user_email}}\",\n    \"currentPassword\": \"{{test_user_password}}\"\n}"
-            },
-            "description": "Update user's email address"
-          }
-        },
-        {
-          "name": "Change Password",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/users/password",
-              "host": ["{{base_url}}"],
-              "path": ["users", "password"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"currentPassword\": \"{{test_user_password}}\",\n    \"newPassword\": \"new{{test_user_password}}\"\n}"
-            },
-            "description": "Change user's password"
-          }
-        },
-        {
-          "name": "Get User's Book Clubs",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/users/book-clubs",
-              "host": ["{{base_url}}"],
-              "path": ["users", "book-clubs"]
-            },
-            "description": "Get all book clubs the user is a member of"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Book Clubs",
-      "description": "Book club management endpoints",
-      "item": []
-    },
-    {
-      "name": "Books",
-      "description": "Book management endpoints",
-      "item": []
-    },
-    {
-      "name": "Discussions",
-      "description": "Book discussion endpoints",
-      "item": []
-    },
-    {
-      "name": "Meetups",
-      "description": "Book club meetup endpoints",
-      "item": []
-    }
-  ]
-} 
+	"info": {
+		"_postman_id": "39702d90-41f3-42d5-b9d6-9a60fffe1231",
+		"name": "Book Club API",
+		"description": "API collection for Book Club application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6765611"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{test_user_name}}\",\n    \"email\": \"{{test_user_email}}\",\n    \"password\": \"{{test_user_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user"
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Set token variable in environment\", function () {",
+									"    pm.environment.set(\"token\", pm.response.json().data.token);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_user_email}}\",\n    \"password\": \"{{test_user_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with user credentials"
+					},
+					"response": []
+				}
+			],
+			"description": "User authentication endpoints"
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"profile"
+							]
+						},
+						"description": "Get the current user's profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated {{test_user_name}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"profile"
+							]
+						},
+						"description": "Update the current user's profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Email",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"new{{test_user_email}}\",\n    \"currentPassword\": \"{{test_user_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/email",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"email"
+							]
+						},
+						"description": "Update user's email address"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"currentPassword\": \"{{test_user_password}}\",\n    \"newPassword\": \"new{{test_user_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"password"
+							]
+						},
+						"description": "Change user's password"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User's Book Clubs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/book-clubs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"book-clubs"
+							]
+						},
+						"description": "Get all book clubs the user is a member of"
+					},
+					"response": []
+				}
+			],
+			"description": "User profile and settings management"
+		},
+		{
+			"name": "Book Clubs",
+			"item": [],
+			"description": "Book club management endpoints"
+		},
+		{
+			"name": "Books",
+			"item": [],
+			"description": "Book management endpoints"
+		},
+		{
+			"name": "Discussions",
+			"item": [],
+			"description": "Book discussion endpoints"
+		},
+		{
+			"name": "Meetups",
+			"item": [],
+			"description": "Book club meetup endpoints"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3001/api/v1",
+			"type": "string"
+		}
+	]
+}
