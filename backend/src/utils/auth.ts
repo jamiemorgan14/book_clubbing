@@ -1,9 +1,16 @@
 import bcrypt from 'bcryptjs';
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import { SignOptions } from 'jsonwebtoken';
 import { User } from '../types/api';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || '24h') as jwt.SignOptions['expiresIn'];
+const JWT_EXPIRES_IN = '24h';
+
+interface JWTPayload {
+  id: number;
+  email: string;
+  name: string;
+}
 
 export class AuthUtils {
   static async hashPassword(password: string): Promise<string> {
@@ -18,25 +25,14 @@ export class AuthUtils {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  static generateToken(user: Pick<User, 'id' | 'email' | 'name'>): string {
-    const payload = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    };
-
+  static generateToken(payload: JWTPayload): string {
     const options: SignOptions = {
-      expiresIn: JWT_EXPIRES_IN,
+      expiresIn: JWT_EXPIRES_IN
     };
-
     return jwt.sign(payload, JWT_SECRET as jwt.Secret, options);
   }
 
-  static verifyToken(token: string): any {
-    try {
-      return jwt.verify(token, JWT_SECRET as jwt.Secret);
-    } catch (error) {
-      throw new Error('Invalid token');
-    }
+  static verifyToken(token: string): JWTPayload {
+    return jwt.verify(token, JWT_SECRET as jwt.Secret) as JWTPayload;
   }
 } 

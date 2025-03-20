@@ -1,29 +1,29 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthUtils } from '../utils/auth';
-import { AppError } from './errorHandler';
+import { AppError } from '../utils/errors';
 import { ApiErrorBuilder } from '../utils/apiResponse';
 
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-  };
+declare global {
+  namespace Express {
+    interface Request {
+      user: {
+        id: number;
+        email: string;
+        name: string;
+      };
+    }
+  }
 }
 
 export const authenticate = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new AppError(
-        401,
-        'UNAUTHORIZED',
-        'No token provided'
-      );
+      throw new AppError('No token provided', 401);
     }
 
     const token = authHeader.split(' ')[1];
@@ -31,6 +31,6 @@ export const authenticate = async (
     req.user = decoded;
     next();
   } catch (error) {
-    next(new AppError(401, 'UNAUTHORIZED', 'Invalid token'));
+    next(new AppError('Invalid token', 401));
   }
 }; 

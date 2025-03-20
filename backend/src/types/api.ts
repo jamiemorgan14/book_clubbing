@@ -115,4 +115,42 @@ export interface Meetup {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BookClub {
+  id: number;
+  name: string;
+  description: string;
+  created_by: number;
+  created_at: Date;
+  updated_at: Date;
+  member_count?: number;
+  is_member?: boolean;
+}
+
+export interface CreateBookClubRequest {
+  name: string;
+  description: string;
+}
+
+export interface UpdateBookClubRequest {
+  name?: string;
+  description?: string;
+}
+
+export interface BookClubMember {
+  user_id: number;
+  book_club_id: number;
+  role: 'admin' | 'member';
+  joined_at: Date;
+}
+
+export interface BookClubWithMembers extends BookClub {
+  members: {
+    user_id: number;
+    name: string;
+    email: string;
+    role: 'admin' | 'member';
+    joined_at: Date;
+  }[];
 } 

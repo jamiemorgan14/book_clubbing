@@ -241,7 +241,169 @@
 		},
 		{
 			"name": "Book Clubs",
-			"item": [],
+			"item": [
+				{
+					"name": "Create Book Club",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/book-clubs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"book-clubs"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My Book Club\",\n    \"description\": \"A great book club for testing\"\n}"
+						},
+						"description": "Create a new book club"
+					}
+				},
+				{
+					"name": "Get Book Club",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/book-clubs/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"book-clubs",
+								"1"
+							]
+						},
+						"description": "Get a book club by ID"
+					}
+				},
+				{
+					"name": "Update Book Club",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/book-clubs/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"book-clubs",
+								"1"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Book Club Name\",\n    \"description\": \"Updated description\"\n}"
+						},
+						"description": "Update a book club"
+					}
+				},
+				{
+					"name": "Delete Book Club",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/book-clubs/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"book-clubs",
+								"1"
+							]
+						},
+						"description": "Delete a book club"
+					}
+				},
+				{
+					"name": "Join Book Club",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/book-clubs/1/join",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"book-clubs",
+								"1",
+								"join"
+							]
+						},
+						"description": "Join a book club"
+					}
+				},
+				{
+					"name": "Leave Book Club",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/book-clubs/1/leave",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"book-clubs",
+								"1",
+								"leave"
+							]
+						},
+						"description": "Leave a book club"
+					}
+				}
+			],
 			"description": "Book club management endpoints"
 		},
 		{
