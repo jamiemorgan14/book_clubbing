@@ -4,6 +4,7 @@ import { authenticate } from '../middleware/auth';
 import { CreateBookClubRequest, UpdateBookClubRequest } from '../types/api';
 import { validateRequest } from '../middleware/validation';
 import { z } from 'zod';
+import { AppError } from '../utils/errors';
 
 const router = Router();
 
@@ -30,6 +31,15 @@ const updateBookClubSchema = z.object({
     .optional()
 });
 
+// UUID validation middleware
+const validateUUID = (req: any, res: any, next: any) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(req.params.id)) {
+    throw new AppError('Invalid book club ID format', 400);
+  }
+  next();
+};
+
 // Create a new book club
 router.post(
   '/',
@@ -53,10 +63,11 @@ router.post(
 router.get(
   '/:id',
   authenticate,
+  validateUUID,
   async (req, res, next) => {
     try {
       const bookClub = await BookClubService.getBookClub(
-        parseInt(req.params.id),
+        req.params.id,
         req.user.id
       );
       res.json({
@@ -73,12 +84,13 @@ router.get(
 router.patch(
   '/:id',
   authenticate,
+  validateUUID,
   validateRequest({ body: updateBookClubSchema }),
   async (req, res, next) => {
     try {
       const data = req.body as UpdateBookClubRequest;
       const bookClub = await BookClubService.updateBookClub(
-        parseInt(req.params.id),
+        req.params.id,
         req.user.id,
         data
       );
@@ -96,10 +108,11 @@ router.patch(
 router.delete(
   '/:id',
   authenticate,
+  validateUUID,
   async (req, res, next) => {
     try {
       await BookClubService.deleteBookClub(
-        parseInt(req.params.id),
+        req.params.id,
         req.user.id
       );
       res.json({
@@ -116,10 +129,11 @@ router.delete(
 router.post(
   '/:id/join',
   authenticate,
+  validateUUID,
   async (req, res, next) => {
     try {
       await BookClubService.joinBookClub(
-        parseInt(req.params.id),
+        req.params.id,
         req.user.id
       );
       res.json({
@@ -136,10 +150,11 @@ router.post(
 router.post(
   '/:id/leave',
   authenticate,
+  validateUUID,
   async (req, res, next) => {
     try {
       await BookClubService.leaveBookClub(
-        parseInt(req.params.id),
+        req.params.id,
         req.user.id
       );
       res.json({

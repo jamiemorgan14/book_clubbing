@@ -6,6 +6,8 @@ import { errorHandler } from './middleware/errorHandler';
 import { ApiResponseBuilder } from './utils/apiResponse';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
+import bookClubRoutes from './routes/bookClubs';
+import pool from './config/database';
 
 // Load environment variables
 dotenv.config();
@@ -27,6 +29,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/book-clubs', bookClubRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -44,4 +47,13 @@ app.use(errorHandler);
 // Start server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  
+  // Test database connection
+  pool.query('SELECT NOW()', (err: Error | null) => {
+    if (err) {
+      console.error('Database connection failed:', err);
+    } else {
+      console.log('Successfully connected to PostgreSQL database');
+    }
+  });
 }); 

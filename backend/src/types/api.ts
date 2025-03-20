@@ -53,11 +53,11 @@ export interface AuthResponse {
 // User Types
 export interface User {
   id: string;
-  email: string;
   name: string;
+  email: string;
   password_hash?: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 // Group Types
@@ -118,10 +118,10 @@ export interface Meetup {
 }
 
 export interface BookClub {
-  id: number;
+  id: string;
   name: string;
   description: string;
-  created_by: number;
+  created_by: string;
   created_at: Date;
   updated_at: Date;
   member_count?: number;
@@ -139,15 +139,15 @@ export interface UpdateBookClubRequest {
 }
 
 export interface BookClubMember {
-  user_id: number;
-  book_club_id: number;
+  user_id: string;
+  book_club_id: string;
   role: 'admin' | 'member';
   joined_at: Date;
 }
 
 export interface BookClubWithMembers extends BookClub {
   members: {
-    user_id: number;
+    user_id: string;
     name: string;
     email: string;
     role: 'admin' | 'member';

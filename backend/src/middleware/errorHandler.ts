@@ -1,17 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { ApiResponseBuilder, ApiErrorBuilder } from '../utils/apiResponse';
-
-export class AppError extends Error {
-  constructor(
-    public statusCode: number,
-    public code: string,
-    message: string,
-    public details?: Record<string, any>
-  ) {
-    super(message);
-    this.name = 'AppError';
-  }
-}
+import { ApiResponseBuilder } from '../utils/apiResponse';
+import { AppError } from '../utils/errors';
 
 export const errorHandler = (
   err: Error,
@@ -22,39 +11,32 @@ export const errorHandler = (
   console.error('Error:', err);
 
   if (err instanceof AppError) {
-    return res.status(err.statusCode).json(
-      ApiResponseBuilder.error({
-        code: err.code,
+    return res.status(err.statusCode).json({
+      success: false,
+      error: {
         message: err.message,
-        details: err.details,
-      })
-    );
-  }
-
-  // Handle validation errors
-  if (err.name === 'ValidationError') {
-    return res.status(400).json(
-      ApiResponseBuilder.error(
-        ApiErrorBuilder.badRequest('Validation Error', {
-          errors: err.message,
-        })
-      )
-    );
+        code: err.code
+      }
+    });
   }
 
   // Handle database errors
-  if (err.name === 'PostgresError') {
-    return res.status(500).json(
-      ApiResponseBuilder.error(
-        ApiErrorBuilder.internal('Database Error')
-      )
-    );
+  if (err.name === 'PostgresError' || (err as any).code?.startsWith('22')) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        message: 'Invalid input format',
+        code: 'INVALID_INPUT'
+      }
+    });
   }
 
   // Default error
-  return res.status(500).json(
-    ApiResponseBuilder.error(
-      ApiErrorBuilder.internal('An unexpected error occurred')
-    )
-  );
+  return res.status(500).json({
+    success: false,
+    error: {
+      message: 'An unexpected error occurred',
+      code: 'INTERNAL_SERVER_ERROR'
+    }
+  });
 }; 
